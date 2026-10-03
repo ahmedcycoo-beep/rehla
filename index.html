@@ -290,7 +290,6 @@ table.spec td{white-space:normal}
       <a href="#order-track" data-track="nav_track">تتبع طلبك</a>
       <a href="#faq" data-track="nav_faq">أسئلة شائعة</a>
     </nav>
-    <a class="btn sm" href="dashboard.html" aria-label="فتح لوحة التحكم">لوحة التحكم</a>
     <button class="icon-btn" id="cartBtn" type="button" aria-label="السلة">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
       <span class="badge num" id="cartCount" hidden>0</span>
@@ -397,7 +396,7 @@ table.spec td{white-space:normal}
       <div><h4>روابط</h4><a href="#products">الفواحة</a><a href="#why">ليه رحّال</a><a href="#order-track">تتبع طلبك</a><a href="#faq">أسئلة شائعة</a></div>
       <div><h4>تواصل معانا</h4><a href="https://wa.me/201127124914" rel="noopener" target="_top" data-track="whatsapp_footer">واتساب: <span class="num" dir="ltr">+201127124914</span></a><span>يوميًا من 10 ص إلى 10 م</span></div>
     </div>
-    <div class="copy"><span>© رحّال RAHHAL — جميع الحقوق محفوظة</span><a href="dashboard.html" id="adminLink" data-notrack>لوحة التحكم</a></div>
+    <div class="copy"><span>© رحّال RAHHAL — جميع الحقوق محفوظة</span></div>
   </div>
 </footer>
 
@@ -722,7 +721,6 @@ function go(adm){
   clearInterval(adminTimer);
   if(adm){scrollTo(0,0);loadAdmin();adminTimer=setInterval(()=>{const a=document.activeElement;if(a&&a.closest&&a.closest('#admin')&&/SELECT|INPUT/.test(a.tagName))return;loadAdmin(true)},10000)}
 }
-$('#adminLink').addEventListener('click',e=>{e.preventDefault();go(true)});
 addEventListener('hashchange',()=>go(location.hash==='#admin'));
 
 async function loadAdmin(quiet){
@@ -886,4 +884,26 @@ startTracking();
 
 </script>
 
-</body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+(function(){
+ const URL='https://hhksrebheklaoxxzhgxr.supabase.co',KEY='sb_publishable_s5JlCsd6xCH9S1kKTqh52w_ZQCVp_Cr';
+ const db=window.supabase.createClient(URL,KEY); const q=s=>document.querySelector(s);
+ async function sync(){
+  const {data}=await db.from('site_settings').select('*').eq('id',1).single(); if(!data)return;
+  const name=data.product_name||'',desc=data.description||'',hero=data.hero_image_url||'',video=data.video_url||'';
+  document.title=name+' | رحّال';
+  const titleEl=document.querySelector('.hero-in h1'),leadEl=document.querySelector('.hero-in .lead'),card=document.querySelector('[data-pid="sample-bag"]'),cardTitle=card&&card.querySelector('h3'),cardDesc=card&&card.querySelector('.card-body>p'),priceEl=card&&card.querySelector('.price b');
+  [titleEl,cardTitle].forEach(e=>{if(e)e.textContent=name}); if(leadEl)leadEl.textContent=desc; if(cardDesc)cardDesc.textContent=desc; if(priceEl)priceEl.textContent=(data.price||0)+' ج.م';
+  if(card){card.dataset.name=name;card.dataset.price=String(data.price||0)}; try{if(window.P&&P['sample-bag']){P['sample-bag'].name=name;P['sample-bag'].price=Number(data.price||0)}}catch(e){}
+  document.querySelectorAll('[data-product-name],#productTitle').forEach(e=>e.textContent=name);
+  document.querySelectorAll('[data-product-desc],#productDescription').forEach(e=>e.textContent=desc);
+  document.querySelectorAll('[data-price],#productPrice').forEach(e=>e.textContent=(data.price||0)+' جنيه');
+  document.querySelectorAll('[data-old-price],#oldPrice').forEach(e=>e.textContent=data.old_price?data.old_price+' جنيه':'');
+  if(hero)document.querySelectorAll('img#productHeroImage,img#productCardImage').forEach(e=>{e.src=hero;e.removeAttribute('hidden')});
+  if(video){let v=document.querySelector('#productVideo');if(v){v.src=video;v.hidden=false;v.load()}}
+  const wa='https://wa.me/'+String(data.whatsapp||'').replace(/\D/g,'');document.querySelectorAll('a[href*="wa.me"]').forEach(a=>a.href=wa);
+ }
+ async function event(name,metadata){try{await db.from('analytics_events').insert({session_id:sessionStorage.getItem('rahhal_sid')||crypto.randomUUID(),event_name:name,page_path:location.pathname,metadata:metadata||{}})}catch(e){}}
+ sync();event('page_view');document.addEventListener('click',e=>{const a=e.target.closest('a[href*="wa.me"]');if(a)event('whatsapp_click')});
+})();
+</script></body></html>
